@@ -41,8 +41,8 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           ROLLING_TAG: rolling
         run: |
-          gh release delete "$ROLLING_TAG" --yes --cleanup-tag || true
-          git tag -fa "$ROLLING_TAG" "$GITHUB_SHA" -m "Rolling release for $GITHUB_SHA"
+          gh release delete "$ROLLING_TAG" --yes --cleanup-tag >/dev/null 2>&1 || true
+          git tag -f "$ROLLING_TAG" "$GITHUB_SHA"
           git push origin "refs/tags/$ROLLING_TAG" --force
           gh release create "$ROLLING_TAG" install.sh \
             --latest \
