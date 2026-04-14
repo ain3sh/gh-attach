@@ -156,7 +156,7 @@ gh-attach -- --trace.log
 
 ## Authentication
 
-By default, `gh-attach` reads your `github.com` `user_session` cookie from a supported browser.
+By default, `gh-attach` reads your GitHub auth cookies from a supported local browser profile.
 
 Supported browser sources:
 
@@ -164,11 +164,33 @@ Supported browser sources:
 - Brave
 - Chromium
 - Edge
+- Firefox
+- Zen
+
+For Firefox-derived browsers such as Firefox and Zen, `gh-attach` also reads live session cookies from `sessionstore-backups/*.jsonlz4` so authenticated uploads keep working even when `cookies.sqlite` alone is not enough.
+
+Inspect what auth source `gh-attach` will use:
+
+```bash
+gh-attach auth doctor
+```
+
+Export a reusable auth-cookie file:
+
+```bash
+gh-attach auth export --session-file "$HOME/.config/gh-attach/session.json"
+```
 
 For headless or scripted environments, set:
 
 ```bash
 export GH_ATTACH_USER_SESSION=...
+```
+
+Or reuse an exported session file directly:
+
+```bash
+gh-attach report.pdf --session-file "$HOME/.config/gh-attach/session.json"
 ```
 
 ## Repository targeting
@@ -211,11 +233,11 @@ For videos above 10 MB, the CLI warns instead of failing because the final outco
 
 `gh-attach` follows the same internal attachment flow GitHub's web UI uses:
 
-1. Read your GitHub `user_session` cookie from a supported browser, or from `GH_ATTACH_USER_SESSION`
+1. Resolve GitHub auth cookies from `--session-file`, `GH_ATTACH_USER_SESSION`, or a supported browser profile
 2. Fetch the repository page and extract the upload token
 3. Request an upload policy from GitHub
 4. Upload the file to GitHub's temporary S3 target
-5. Finalize the upload and print the resulting attachment reference
+5. Finalize the upload using GitHub's returned asset endpoint and print the resulting attachment reference
 
 This keeps attachments scoped the way GitHub's web uploads are, including private-repo behavior.
 

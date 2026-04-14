@@ -28,8 +28,9 @@ type Client struct {
 }
 
 type policyResponse struct {
-	UploadURL string `json:"upload_url"`
-	Asset     struct {
+	UploadURL      string `json:"upload_url"`
+	AssetUploadURL string `json:"asset_upload_url"`
+	Asset          struct {
 		ID          int    `json:"id"`
 		Name        string `json:"name"`
 		Size        int64  `json:"size"`
@@ -40,19 +41,10 @@ type policyResponse struct {
 	AssetUploadAuthenticityToken string            `json:"asset_upload_authenticity_token"`
 }
 
-func NewClient(sessionCookie *http.Cookie) *Client {
+func NewClient(cookies []*http.Cookie) *Client {
 	jar, _ := cookiejar.New(nil)
 	ghURL, _ := url.Parse(defaultBaseURL)
-
-	sameSiteCookie := &http.Cookie{
-		Name:     "__Host-user_session_same_site",
-		Value:    sessionCookie.Value,
-		Path:     "/",
-		Secure:   true,
-		HttpOnly: true,
-	}
-
-	jar.SetCookies(ghURL, []*http.Cookie{sessionCookie, sameSiteCookie})
+	jar.SetCookies(ghURL, cookies)
 
 	return &Client{
 		httpClient: &http.Client{Jar: jar, Timeout: 30 * time.Second},
@@ -278,7 +270,7 @@ func (c *Client) finalizeUpload(owner, repo string, policy *policyResponse, file
 		return nil, fmt.Errorf("closing multipart writer: %w", err)
 	}
 
-	req, err := http.NewRequest(http.MethodPut, fmt.Sprintf("%s/upload/assets/%d", c.baseURL, policy.Asset.ID), body)
+	req, err := http.NewRequest(http.MethodPut, c.assetUploadURL(policy), body)
 	if err != nil {
 		return nil, fmt.Errorf("creating finalize request: %w", err)
 	}
@@ -320,6 +312,23 @@ func (c *Client) finalizeUpload(owner, repo string, policy *policyResponse, file
 		Size:        file.Size,
 		Category:    file.Category,
 	}, nil
+}
+
+func (c *Client) assetUploadURL(policy *policyResponse) string {
+	if strings.TrimSpace(policy.AssetUploadURL) == "" {
+		return fmt.Sprintf("%s/upload/assets/%d", c.baseURL, policy.Asset.ID)
+	}
+
+	base, err := url.Parse(c.baseURL)
+	if err != nil {
+		return policy.AssetUploadURL
+	}
+	ref, err := url.Parse(policy.AssetUploadURL)
+	if err != nil {
+		return policy.AssetUploadURL
+	}
+
+	return base.ResolveReference(ref).String()
 }
 
 func (c *Client) repoURL(owner, repo string) string {
