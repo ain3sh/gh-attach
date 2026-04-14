@@ -3,7 +3,7 @@
 set -eu
 
 BINARY_NAME="gh-attach"
-REPO="${GH_ATTACH_REPO:-ain3sh/gh-artifact}"
+REPO="${GH_ATTACH_REPO:-ain3sh/gh-attach}"
 DEFAULT_REF="${GH_ATTACH_REF:-}"
 BIN_DIR="${GH_ATTACH_INSTALL_DIR:-$HOME/.local/bin}"
 REF="$DEFAULT_REF"

@@ -21,19 +21,19 @@ gh-attach clip.mp4 report.pdf --repo owner/repo --json
 One-line install:
 
 ```bash
-curl -fsSL https://github.com/ain3sh/gh-artifact/releases/latest/download/install.sh | sh
+curl -fsSL https://github.com/ain3sh/gh-attach/releases/latest/download/install.sh | sh
 ```
 
 Install to a custom directory:
 
 ```bash
-curl -fsSL https://github.com/ain3sh/gh-artifact/releases/latest/download/install.sh | sh -s -- --bin-dir "$HOME/bin"
+curl -fsSL https://github.com/ain3sh/gh-attach/releases/latest/download/install.sh | sh -s -- --bin-dir "$HOME/bin"
 ```
 
 Pin a specific version:
 
 ```bash
-curl -fsSL https://github.com/ain3sh/gh-artifact/releases/latest/download/install.sh | sh -s -- --ref v0.1.0
+curl -fsSL https://github.com/ain3sh/gh-attach/releases/latest/download/install.sh | sh -s -- --ref v0.1.0
 ```
 
 The bootstrap script downloads the latest published release source by default and builds locally, so `go` must already be installed.
